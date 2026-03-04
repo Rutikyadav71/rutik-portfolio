@@ -4,53 +4,6 @@ A production-ready full-stack portfolio website built with Next.js 15 (App Route
 
 ---
 
-## 📁 Folder Structure
-
-```
-portfolio/
-├── app/
-│   ├── layout.tsx              # Root layout with SEO metadata & fonts
-│   ├── page.tsx                # Main page — assembles all sections
-│   ├── globals.css             # Global styles, custom fonts, utilities
-│   └── api/
-│       └── contact/
-│           └── route.ts        # API route — handles contact form (Supabase insert)
-│
-├── components/
-│   ├── Navbar.tsx              # Sticky animated navbar with mobile drawer
-│   ├── Hero.tsx                # Hero section with TypeAnimation & floating orbs
-│   ├── About.tsx               # About section with animated CGPA progress bar
-│   ├── Skills.tsx              # Skills section with glassmorphism category cards
-│   ├── Projects.tsx            # Projects section with hover glow effect
-│   ├── Experience.tsx          # Experience timeline with company details
-│   ├── Education.tsx           # Education with animated progress bars
-│   ├── Contact.tsx             # Contact form connected to Supabase
-│   ├── Footer.tsx              # Footer with nav and socials
-│   └── ui/
-│       ├── Button.tsx          # Reusable button with variants & loading state
-│       ├── Card.tsx            # Glassmorphism card component
-│       └── Container.tsx       # Layout container with max-width variants
-│
-├── lib/
-│   └── supabaseClient.ts       # Supabase client initialization
-│
-├── types/
-│   └── index.ts                # TypeScript interfaces
-│
-├── public/
-│   ├── resume.pdf              # ← ADD YOUR RESUME HERE
-│   └── favicon.ico             # ← ADD YOUR FAVICON HERE
-│
-├── .env.local.example          # Environment variables template
-├── tailwind.config.ts          # Tailwind config with custom theme
-├── postcss.config.js
-├── next.config.js
-├── tsconfig.json
-└── package.json
-```
-
----
-
 ## 📦 NPM Packages to Install
 
 ```bash
