@@ -8,6 +8,7 @@ import AdminToolbar          from '@/components/admin/AdminToolbar'
 import { ThemeProvider }     from '@/context/ThemeContext'
 import ThemeApplicator       from '@/components/ThemeApplicator'
 import ConditionalLayers     from '@/components/ConditionalLayers'
+import ClientEffects from '@/components/ClientEffects'
 
 // Heavy WebGL / canvas components — load after page is interactive
 const ThreeBackground = dynamic(() => import('@/components/ThreeBackground'), { ssr:false, loading:()=>null })
@@ -75,11 +76,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   z:9000 Navbar
               */}
               {children}
-              <ThreeBackground />
+              <ClientEffects />
               <ConditionalLayers />
-              <SkillOverlay />
-              <ScrollProgress />
-              <CursorGlow />
               <AdminToolbar />
               <ThemeApplicator />
             </PlanetProvider>
