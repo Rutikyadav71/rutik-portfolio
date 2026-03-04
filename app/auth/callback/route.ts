@@ -1,0 +1,19 @@
+import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { NextResponse } from 'next/server'
+
+/** Handles the OAuth / magic-link redirect from Supabase */
+export async function GET(request: Request) {
+  const { searchParams, origin } = new URL(request.url)
+  const code = searchParams.get('code')
+  const next = searchParams.get('next') ?? '/'
+
+  if (code) {
+    const supabase = createSupabaseServerClient()
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    if (!error) {
+      return NextResponse.redirect(`${origin}${next}`)
+    }
+  }
+
+  return NextResponse.redirect(`${origin}/?auth=error`)
+}
