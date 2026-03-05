@@ -10,12 +10,6 @@ import ThemeApplicator       from '@/components/ThemeApplicator'
 import ConditionalLayers     from '@/components/ConditionalLayers'
 import ClientEffects from '@/components/ClientEffects'
 
-// Heavy WebGL / canvas components — load after page is interactive
-const ThreeBackground = dynamic(() => import('@/components/ThreeBackground'), { ssr:false, loading:()=>null })
-const SkillOverlay    = dynamic(() => import('@/components/SkillOverlay'),     { ssr:false, loading:()=>null })
-const CursorGlow      = dynamic(() => import('@/components/CursorGlow'),       { ssr:false, loading:()=>null })
-const ScrollProgress  = dynamic(() => import('@/components/ScrollProgress'),   { ssr:false, loading:()=>null })
-
 export const metadata: Metadata = {
   title:       'Rutik Yadav | Full Stack Developer',
   description: 'Portfolio of Rutik Yadav — Full Stack Developer specialising in Java, Spring Boot and React.js.',
