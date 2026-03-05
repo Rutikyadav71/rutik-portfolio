@@ -82,8 +82,8 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       }
 
       return { error: null }
-    } catch (err: any) {
-      const m = String(err?.message ?? err ?? '')
+    } catch (err: unknown) {
+      const m = err instanceof Error ? err.message : String(err ?? '')
       return {
         error:
           `🌐 Connection failed\n\n` +

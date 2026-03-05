@@ -50,18 +50,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AdminProvider>
             <PortfolioProvider>
               <PlanetProvider>
-                {/*
-                  children renders first — hero text is visible instantly.
-                  ClientEffects loads heavy browser-only layers after hydration.
-
-                  Z-INDEX STACK
-                    z:1    ThreeBackground  (WebGL sphere)
-                    z:2    ParticleField    (cosmic dust)
-                    z:3    SkillOverlay     (lines + pills)
-                    z:10   Page content
-                    z:20   PlanetSelector
-                    z:9000 Navbar
-                */}
                 {children}
                 <ClientEffects />
                 <ConditionalLayers />

@@ -159,7 +159,7 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
       if (raw) {
         const saved = JSON.parse(raw) as Partial<PortfolioData>
         if (saved.projects) {
-          saved.projects = saved.projects.map((p: any) => ({ images: [], projectTag: 'Full Stack', ...p }))
+          saved.projects = saved.projects.map((p: Partial<Project>) => ({ images: [] as string[], projectTag: 'Full Stack' as string, ...p } as Project))
         }
         if (saved.about && !saved.about.frameConfig) {
           saved.about.frameConfig = { shape: 'portrait', style: 'gradient', size: 220 }
@@ -179,10 +179,10 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
         if (!error && rows?.value) {
           const loaded = rows.value as Partial<PortfolioData>
           if (loaded.projects) {
-            loaded.projects = loaded.projects.map((p: any) => ({ images: [], projectTag: 'Full Stack', ...p }))
+            loaded.projects = loaded.projects.map((p: Partial<Project>) => ({ images: [] as string[], projectTag: 'Full Stack' as string, ...p } as Project))
           }
-          if (loaded.about && !(loaded.about as any).frameConfig) {
-            (loaded.about as any).frameConfig = { shape: 'portrait', style: 'gradient', size: 220 }
+          if (loaded.about && !loaded.about.frameConfig) {
+            loaded.about.frameConfig = { shape: 'portrait', style: 'gradient', size: 220 }
           }
           setData(prev => {
             const next = { ...prev, ...loaded }
