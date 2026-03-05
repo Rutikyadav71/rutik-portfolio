@@ -53,8 +53,9 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     )
 
-  } catch (err: any) {
-    console.error('[contact] Unexpected error:', err?.message ?? err)
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[contact] Unexpected error:', msg)
     return NextResponse.json({ error: 'An unexpected error occurred.' }, { status: 500 })
   }
 }

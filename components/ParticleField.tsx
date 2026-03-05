@@ -24,7 +24,7 @@ export default function ParticleField() {
   useEffect(() => {
     const cb = () => setReady(true)
     if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(cb, { timeout: 2000 })
+      (window as Window & { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => void }).requestIdleCallback(cb, { timeout: 2000 })
     } else { setTimeout(cb, 300) }
   }, [])
 

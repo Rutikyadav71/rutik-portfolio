@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import type * as THREE from 'three'
 import { usePlanet, PLANETS, type PlanetDef } from '@/context/PlanetContext'
 
@@ -29,12 +29,17 @@ type Phase = 'entry' | 'idle' | 'exit'
 export default function ThreeBackground() {
   const { current: planet } = usePlanet()
   const containerRef = useRef<HTMLDivElement>(null)
-  const [ready, setReady] = useState(false)
-  // Defer heavy WebGL until browser is idle after first paint
+  // Defer heavy WebGL until browser is idle after first paint (ready flag handled via R.current.disposed)
   useEffect(() => {
-    const cb = () => setReady(true)
-    if ('requestIdleCallback' in window) (window as any).requestIdleCallback(cb, { timeout: 1500 })
-    else setTimeout(cb, 400)
+    const cb = () => {
+      // Trigger re-render to start WebGL init by setting a harmless ref
+      if (containerRef.current) containerRef.current.dataset.ready = '1'
+    }
+    if ('requestIdleCallback' in window) {
+      ;(window as Window & typeof globalThis & { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => void }).requestIdleCallback(cb, { timeout: 1500 })
+    } else {
+      setTimeout(cb, 400)
+    }
   }, [])
 
   const R = useRef<{
@@ -119,7 +124,7 @@ export default function ThreeBackground() {
       container.appendChild(renderer.domElement)
       renderer.domElement.style.cssText = 'position:absolute;inset:0;opacity:0;'
       r.renderer = renderer
-      reg(()=>{ container.contains(renderer.domElement) && container.removeChild(renderer.domElement); renderer.dispose() })
+      reg(()=>{ if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement); renderer.dispose() })
 
       const scene  = new THREE.Scene()
       const camera = new THREE.PerspectiveCamera(50, W()/H(), 0.1, 300)
@@ -181,7 +186,7 @@ export default function ThreeBackground() {
         loader.load(p.texture, (tex:THREE.Texture) => {
           if (disposed) { tex.dispose(); return }
           tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.ClampToEdgeWrapping
-          try { if ('SRGBColorSpace' in THREE) tex.colorSpace=(THREE as any).SRGBColorSpace } catch{ /* ignore */ }
+          try { if ('SRGBColorSpace' in THREE) tex.colorSpace=(THREE as unknown as { SRGBColorSpace: THREE.ColorSpace }).SRGBColorSpace } catch{ /* ignore */ }
           r.cache.set(p.id, tex); cb?.(tex)
         }, undefined, ()=>{})
       }

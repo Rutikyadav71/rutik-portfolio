@@ -78,7 +78,7 @@ const offset = Math.round(threshold * 200)
 
 const inView = useInView(ref, {
   once: true,
-  margin: `-${offset}px 0px -${offset}px 0px` as any,
+  margin: `-${offset}px 0px -${offset}px 0px` as `${number}px ${number}px ${number}px ${number}px`,
 })
 
   return (

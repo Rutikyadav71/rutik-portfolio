@@ -7,7 +7,7 @@ import {
   Upload, X, Image as ImageIcon, Loader2,
   ChevronLeft, ChevronRight, AlertCircle, Tag, Check,
 } from 'lucide-react'
-import { usePortfolio } from '@/context/PortfolioContext'
+import { usePortfolio, type Project } from '@/context/PortfolioContext'
 import { useAdmin }      from '@/context/AdminContext'
 import { EditableText, EditableTags } from '@/components/admin/EditableText'
 
@@ -95,7 +95,7 @@ function ImageSlider({ images, cardHovered, imageHovered }: { images:string[]; c
   const onTouchStart = (e:React.TouchEvent) => { touchStart.current = e.touches[0].clientX }
   const onTouchEnd   = (e:React.TouchEvent) => {
     const d = touchStart.current - e.changedTouches[0].clientX
-    if (Math.abs(d)>40) d>0 ? setIdx(i=>(i+1)%images.length) : setIdx(i=>(i-1+images.length)%images.length)
+    if (Math.abs(d)>40) { if (d>0) setIdx(i=>(i+1)%images.length); else setIdx(i=>(i-1+images.length)%images.length) }
   }
 
   return (
@@ -171,7 +171,7 @@ function ImageManager({ projectId, images, onUpdate }: { projectId:string; image
         if (pub?.publicUrl) newUrls.push(pub.publicUrl)
         else errors.push(`${file.name}: no public URL`)
       }
-    } catch (err:any) { setUploadErr(`Upload failed: ${err?.message??err}`) }
+    } catch (err: unknown) { setUploadErr(`Upload failed: ${err instanceof Error ? err.message : String(err)}`) }
     setUploading(false)
     if (errors.length>0) setUploadErr(`${errors.length} failed:\n${errors.join('\n')}`)
     if (newUrls.length>0) onUpdate([...images,...newUrls])
@@ -229,14 +229,14 @@ function ImageManager({ projectId, images, onUpdate }: { projectId:string; image
   )
 }
 
-function ProjectCard({ project,index,inView }: { project:any;index:number;inView:boolean }) {
+function ProjectCard({ project,index,inView }: { project:Project;index:number;inView:boolean }) {
   const { updateProject,removeProject } = usePortfolio()
   const { isAdmin,isEditMode } = useAdmin()
   const [hovered,       setHovered]       = useState(false)
   const [imageHovered,  setImageHovered]  = useState(false)
   const [showTagEditor, setShowTagEditor] = useState(false)
 
-  const update = (field:string,val:any) => updateProject(project.id,{ [field]:val })
+  const update = (field: keyof Project, val: Project[keyof Project]) => updateProject(project.id,{ [field]:val })
   const accent   = ACCENTS[index % ACCENTS.length]
   const images   = (project.images ?? []) as string[]
   const tag      = project.projectTag ?? 'Full Stack'

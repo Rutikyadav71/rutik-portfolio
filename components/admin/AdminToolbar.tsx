@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Edit3, Eye, LogOut, Lock, CheckCircle, Loader2, Settings, Mail, KeyRound,
   AlertCircle, X, AlertTriangle, ExternalLink, Save as SaveIcon, Shield,
-  Palette, Sliders, Type, RotateCcw, ChevronDown, ChevronUp,
+  Palette, Sliders, Type, RotateCcw, ChevronDown, ChevronUp, type LucideIcon,
 } from 'lucide-react'
 import { useAdmin }     from '@/context/AdminContext'
 import { usePortfolio } from '@/context/PortfolioContext'
@@ -58,7 +58,7 @@ function ToggleRow({ label, value, onChange }: { label:string; value:boolean; on
 
 // ─── Section accordion ────────────────────────────────────────────────────────
 function Section({ title, icon: Icon, children, color='#818cf8' }: {
-  title:string; icon:any; children:React.ReactNode; color?:string
+  title:string; icon:LucideIcon; children:React.ReactNode; color?:string
 }) {
   const [open, setOpen] = useState(false)
   return (

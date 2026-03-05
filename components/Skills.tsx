@@ -1,7 +1,7 @@
 'use client'
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
-import { usePortfolio } from '@/context/PortfolioContext'
+import { usePortfolio, type SkillCategory } from '@/context/PortfolioContext'
 import { useAdmin } from '@/context/AdminContext'
 
 const SL: React.CSSProperties = { fontFamily:'"JetBrains Mono",monospace',fontSize:'0.7rem',letterSpacing:'0.28em',textTransform:'uppercase',color:'#06b6d4',marginBottom:'12px',display:'block' }
@@ -17,7 +17,7 @@ const PILL_SLIDE = {
   visible: { opacity: 1, scale: 1    },
 }
 
-function SkillCard({ cat, index, inView }: { cat: any; index: number; inView: boolean }) {
+function SkillCard({ cat, index, inView }: { cat: SkillCategory; index: number; inView: boolean }) {
   const { updateSkillCategory } = usePortfolio()
   const { isAdmin, isEditMode }  = useAdmin()
 

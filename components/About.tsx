@@ -16,7 +16,7 @@ const H2: React.CSSProperties   = { fontFamily:'Syne,sans-serif',fontWeight:800,
 const GRAD: React.CSSProperties = { background:'linear-gradient(135deg,#818cf8,#06b6d4)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text' }
 const CARD: React.CSSProperties = { background:'rgba(8,15,40,0.65)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:'16px',padding:'18px 22px' }
 
-const spring = (delay=0) => ({ duration:0.70,delay,ease:[0.22,1,0.36,1] as any })
+const spring = (delay=0) => ({ duration:0.70,delay,ease:[0.22,1,0.36,1] as [number,number,number,number] })
 const UP     = { hidden:{ opacity:0,y:36  }, visible:{ opacity:1,y:0  } }
 const LEFT   = { hidden:{ opacity:0,x:-40 }, visible:{ opacity:1,x:0  } }
 const RIGHT  = { hidden:{ opacity:0,x: 40 }, visible:{ opacity:1,x:0  } }
@@ -101,8 +101,8 @@ function PhotoEditorModal({
       const { data: pub } = client.storage.from('profile-images').getPublicUrl(upData?.path ?? path)
       if (!pub?.publicUrl) { setUploadErr('Got no public URL'); setUploading(false); return }
       onSave(pub.publicUrl, cfg)
-    } catch (err: any) {
-      setUploadErr(err?.message ?? 'Upload failed')
+    } catch (err: unknown) {
+      setUploadErr(err instanceof Error ? err.message : 'Upload failed')
     }
     setUploading(false)
   }
@@ -276,7 +276,7 @@ export default function About() {
   const [showPhotoEditor, setShowPhotoEditor] = useState(false)
 
   // Frame config — sourced from context (persisted in Supabase + localStorage)
-  const frameConfig: FrameConfig = (about as any).frameConfig ?? { shape:'portrait', style:'gradient', size:220 }
+  const frameConfig: FrameConfig = (about as unknown as { frameConfig?: FrameConfig }).frameConfig ?? { shape:'portrait', style:'gradient', size:220 }
 
   const langs   = about.languages ?? []
   const hl      = about.highlights ?? { spec:'Java, SQL',frontend:'React',goalLabel:'Software Dev',graduating:'2026 \u2014 CSE' }
@@ -292,7 +292,7 @@ export default function About() {
   }
 
   const handlePhotoSave = (avatarSrc: string, cfg: FrameConfig) => {
-    updateAbout({ avatarUrl: avatarSrc, frameConfig: cfg } as any)
+    updateAbout({ avatarUrl: avatarSrc, frameConfig: cfg } as Parameters<typeof updateAbout>[0])
     setShowPhotoEditor(false)
   }
 
