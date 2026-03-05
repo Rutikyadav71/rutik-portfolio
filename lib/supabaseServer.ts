@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import type { CookieOptions } from '@supabase/ssr'
 
 /** Server-side Supabase client for Route Handlers & Server Components */
 export async function createSupabaseServerClient() {
@@ -17,7 +18,7 @@ export async function createSupabaseServerClient() {
           cookiesToSet: {
             name: string
             value: string
-            options?: any
+            options?: CookieOptions
           }[]
         ) {
           try {
