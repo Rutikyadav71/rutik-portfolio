@@ -57,7 +57,7 @@ export default function SkillOverlay() {
   const { current, switching } = usePlanet()
 
   const [displayed, setDisplayed] = useState(current)
-  const switchTimer = useRef<ReturnType<typeof setTimeout>>()
+  const switchTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useEffect(() => {
     if (!switching) { setDisplayed(current); return }
     clearTimeout(switchTimer.current)
@@ -79,7 +79,7 @@ export default function SkillOverlay() {
   }, [])
 
   const [meshHit, setMeshHit] = useState(false)
-  const leaveTimer = useRef<ReturnType<typeof setTimeout>>()
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useEffect(() => {
     const onHover = (e: Event) => {
       const { hit } = (e as CustomEvent<{ hit: boolean }>).detail

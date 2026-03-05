@@ -18,7 +18,7 @@ export default function PlanetSelector() {
   const { current, select, switching } = usePlanet()
   const [open,    setOpen] = useState(false)
   const [hovered, setHov]  = useState<string | null>(null)
-  const closeTimer = useRef<ReturnType<typeof setTimeout>>()
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const openPanel  = () => { clearTimeout(closeTimer.current); setOpen(true) }
   const closePanel = () => { closeTimer.current = setTimeout(() => setOpen(false), 300) }

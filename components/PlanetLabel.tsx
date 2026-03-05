@@ -26,7 +26,7 @@ export default function PlanetLabel() {
 
   // Update displayed planet only after exit phase completes (420 ms)
   const [displayed, setDisplayed] = useState(current)
-  const switchTimer = useRef<ReturnType<typeof setTimeout>>()
+  const switchTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useEffect(() => {
     if (!switching) { setDisplayed(current); return }
     clearTimeout(switchTimer.current)
