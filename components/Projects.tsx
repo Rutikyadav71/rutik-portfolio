@@ -103,7 +103,6 @@ function ImageSlider({ images, cardHovered, imageHovered }: { images:string[]; c
       <div
         style={{ position:'relative',width:'100%',paddingTop:'56.25%',borderRadius:'12px',overflow:'hidden',background:'rgba(8,15,40,0.8)',cursor:images.length>1?'grab':'default' }}
         onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}
-        onMouseEnter={e => { /* imageHovered is managed by parent via prop — here we just use CSS cursor */ }}
       >
         <AnimatePresence mode="wait" initial={false}>
           <motion.img key={idx} src={images[idx]} alt={`img ${idx+1}`}
@@ -200,6 +199,7 @@ function ImageManager({ projectId, images, onUpdate }: { projectId:string; image
         <div style={{ display:'flex',flexWrap:'wrap',gap:'8px',marginBottom:'10px' }}>
           {images.map((url,i)=>(
             <div key={url} style={{ position:'relative',width:'68px',height:'50px',borderRadius:'7px',overflow:'hidden',border:'1px solid rgba(99,102,241,0.30)',flexShrink:0 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={url} alt={`img-${i}`} style={{ width:'100%',height:'100%',objectFit:'cover',display:'block' }} onError={e=>{(e.currentTarget as HTMLImageElement).style.opacity='0.3'}}/>
               <button onClick={()=>deleteImage(url)} disabled={deleting===url}
                 style={{ position:'absolute',top:'2px',right:'2px',width:'18px',height:'18px',borderRadius:'4px',background:'rgba(239,68,68,0.88)',border:'none',color:'#fff',cursor:deleting===url?'wait':'pointer',display:'flex',alignItems:'center',justifyContent:'center',padding:0 }}>

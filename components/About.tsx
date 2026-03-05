@@ -1,11 +1,11 @@
 'use client'
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import {
   Code2, Rocket, Target, MapPin, GraduationCap, User,
   Globe, Plus, Trash2, Camera, Loader2, Upload, Check, X,
-  Square, Circle, Hexagon, Triangle,
+  Square, Circle,
 } from 'lucide-react'
 import { usePortfolio } from '@/context/PortfolioContext'
 import { useAdmin }      from '@/context/AdminContext'
@@ -146,8 +146,11 @@ function PhotoEditorModal({
               {/* Photo container */}
               <div style={{ position:'relative',zIndex:1,borderRadius:shape.radius,overflow:'hidden',width:'100%',height:'100%',border:'var(--frame-thickness-val, 2px) solid var(--frame-border, rgba(99,102,241,0.25))',background:'var(--frame-bg, rgba(8,15,40,0.8))' }}>
                 {previewSrc ? (
-                  <img src={previewSrc} alt="Preview"
-                    style={{ width:'100%',height:'100%',objectFit:'cover',objectPosition:'top center',display:'block' }}/>
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={previewSrc} alt="Preview"
+                      style={{ width:'100%',height:'100%',objectFit:'cover',objectPosition:'top center',display:'block' }}/>
+                  </>
                 ) : (
                   <div style={{ width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center' }}>
                     <User size={48} color="rgba(99,102,241,0.35)" strokeWidth={1.2}/>
@@ -274,10 +277,6 @@ export default function About() {
 
   // Frame config — sourced from context (persisted in Supabase + localStorage)
   const frameConfig: FrameConfig = (about as any).frameConfig ?? { shape:'portrait', style:'gradient', size:220 }
-  const setFrameConfig = (cfg: FrameConfig | ((c: FrameConfig) => FrameConfig)) => {
-    const next = typeof cfg === 'function' ? cfg(frameConfig) : cfg
-    updateAbout({ frameConfig: next } as any)
-  }
 
   const langs   = about.languages ?? []
   const hl      = about.highlights ?? { spec:'Java, SQL',frontend:'React',goalLabel:'Software Dev',graduating:'2026 \u2014 CSE' }
@@ -344,6 +343,7 @@ export default function About() {
                 background:'var(--frame-bg, rgba(8,15,40,0.8))',
                 border:'var(--frame-thickness, 2px) solid var(--frame-border, rgba(99,102,241,0.25))',
               }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={avatarSrc}
                   alt="Rutik Yadav"

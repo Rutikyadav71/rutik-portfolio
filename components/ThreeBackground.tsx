@@ -181,7 +181,7 @@ export default function ThreeBackground() {
         loader.load(p.texture, (tex:THREE.Texture) => {
           if (disposed) { tex.dispose(); return }
           tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.ClampToEdgeWrapping
-          try { if ('SRGBColorSpace' in THREE) tex.colorSpace=(THREE as any).SRGBColorSpace } catch(_){}
+          try { if ('SRGBColorSpace' in THREE) tex.colorSpace=(THREE as any).SRGBColorSpace } catch{ /* ignore */ }
           r.cache.set(p.id, tex); cb?.(tex)
         }, undefined, ()=>{})
       }

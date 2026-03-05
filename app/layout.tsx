@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next'
-import dynamic from 'next/dynamic'
 import './globals.css'
 import { AdminProvider }     from '@/context/AdminContext'
 import { PortfolioProvider } from '@/context/PortfolioContext'
@@ -8,7 +7,7 @@ import AdminToolbar          from '@/components/admin/AdminToolbar'
 import { ThemeProvider }     from '@/context/ThemeContext'
 import ThemeApplicator       from '@/components/ThemeApplicator'
 import ConditionalLayers     from '@/components/ConditionalLayers'
-import ClientEffects from '@/components/ClientEffects'
+import ClientEffects         from '@/components/ClientEffects'
 
 export const metadata: Metadata = {
   title:       'Rutik Yadav | Full Stack Developer',
@@ -27,15 +26,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Preconnect first so the font DNS + TLS is resolved before the stylesheet */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-
-        {/*
-          Only load the weights we actually use — saves ~60 KB vs the previous request.
-          display=swap  →  text renders immediately in fallback font; swap in when loaded.
-          Removed ital variants of DM Sans (not used anywhere).
-        */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
@@ -54,29 +47,29 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         } as React.CSSProperties}
       >
         <ThemeProvider>
-        <AdminProvider>
-          <PortfolioProvider>
-            <PlanetProvider>
-              {/*
-                Render children FIRST so the hero text is visible instantly.
-                Heavy background layers load after without blocking paint.
+          <AdminProvider>
+            <PortfolioProvider>
+              <PlanetProvider>
+                {/*
+                  children renders first — hero text is visible instantly.
+                  ClientEffects loads heavy browser-only layers after hydration.
 
-                Z-INDEX STACK
-                  z:1    ThreeBackground  (WebGL sphere — desktop only)
-                  z:2    ParticleField    (cosmic dust)
-                  z:3    SkillOverlay     (lines + pills — desktop only)
-                  z:10   Page content
-                  z:20   PlanetSelector
-                  z:9000 Navbar
-              */}
-              {children}
-              <ClientEffects />
-              <ConditionalLayers />
-              <AdminToolbar />
-              <ThemeApplicator />
-            </PlanetProvider>
-          </PortfolioProvider>
-        </AdminProvider>
+                  Z-INDEX STACK
+                    z:1    ThreeBackground  (WebGL sphere)
+                    z:2    ParticleField    (cosmic dust)
+                    z:3    SkillOverlay     (lines + pills)
+                    z:10   Page content
+                    z:20   PlanetSelector
+                    z:9000 Navbar
+                */}
+                {children}
+                <ClientEffects />
+                <ConditionalLayers />
+                <AdminToolbar />
+                <ThemeApplicator />
+              </PlanetProvider>
+            </PortfolioProvider>
+          </AdminProvider>
         </ThemeProvider>
       </body>
     </html>

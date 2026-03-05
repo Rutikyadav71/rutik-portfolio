@@ -1,5 +1,5 @@
 'use client'
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Edit3, Eye, LogOut, Lock, CheckCircle, Loader2, Settings, Mail, KeyRound,
@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import { useAdmin }     from '@/context/AdminContext'
 import { usePortfolio } from '@/context/PortfolioContext'
-import { useTheme, DEFAULT_THEME, ThemeSettings } from '@/context/ThemeContext'
+import { useTheme, ThemeSettings } from '@/context/ThemeContext'
 
 // ─── Mini color input ─────────────────────────────────────────────────────────
 function ColorRow({ label, value, onChange }: { label:string; value:string; onChange:(v:string)=>void }) {

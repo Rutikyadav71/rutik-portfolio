@@ -216,15 +216,6 @@ function RoleStylePanel({ rs, onRsChange, onClose }: {
   )
 }
 
-function Stat({ value, label }: { value:string; label:string }) {
-  return (
-    <div style={{ textAlign:'center' }}>
-      <p style={{ margin:0,fontFamily:'Syne,sans-serif',fontWeight:700,fontSize:'1.1rem',background:'linear-gradient(135deg,#6366f1,#06b6d4)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text' }}>{value}</p>
-      <p style={{ margin:'3px 0 0',color:'#475569',fontSize:'0.62rem',fontFamily:'"JetBrains Mono",monospace',textTransform:'uppercase',letterSpacing:'0.14em' }}>{label}</p>
-    </div>
-  )
-}
-const SEP: React.CSSProperties = { width:'1px',height:'28px',background:'rgba(255,255,255,0.07)',flexShrink:0 }
 
 export default function Hero() {
   const { data, updateHero } = usePortfolio()
