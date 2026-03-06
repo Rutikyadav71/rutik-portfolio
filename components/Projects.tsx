@@ -250,7 +250,7 @@ function ProjectCard({ project,index,inView }: { project:Project;index:number;in
       onMouseEnter={()=>setHovered(true)}
       onMouseLeave={()=>{ setHovered(false); setShowTagEditor(false) }}>
       <div style={{
-        position:'relative',height:'100%',background:'rgba(8,15,40,0.72)',backdropFilter:'blur(22px)',WebkitBackdropFilter:'blur(22px)',
+        position:'relative',height:'100%',background:'var(--card-bg,rgba(8,15,40,0.72))',backdropFilter:'blur(var(--card-blur,22px))',WebkitBackdropFilter:'blur(var(--card-blur,22px))',
         border:`1px solid ${hovered?'rgba(99,102,241,0.35)':'rgba(255,255,255,0.07)'}`,borderRadius:'18px',
         display:'flex',flexDirection:'column',overflow:'hidden',
         boxShadow:hovered?`0 16px 48px ${accent.glow}`:'none',transition:'border-color 0.3s,box-shadow 0.3s',

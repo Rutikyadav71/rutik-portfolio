@@ -6,6 +6,7 @@ import Projects      from '@/components/Projects'
 import Experience    from '@/components/Experience'
 import Certificates  from '@/components/Certificates'
 import Education     from '@/components/Education'
+import CodingLinks   from '@/components/Codinglinks'
 import Contact       from '@/components/Contact'
 import Footer        from '@/components/Footer'
 import SectionReveal from '@/components/SectionReveal'
@@ -66,6 +67,11 @@ export default function Home() {
         {/* Education */}
         <section id="education">
           <SectionReveal variant="slideRight"><Education /></SectionReveal>
+        </section>
+
+        {/* Coding Profiles */}
+        <section id="coding-profiles">
+          <SectionReveal variant="zoomFade"><CodingLinks /></SectionReveal>
         </section>
 
         {/* Contact */}

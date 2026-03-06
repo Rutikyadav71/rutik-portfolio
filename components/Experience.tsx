@@ -55,7 +55,7 @@ export default function Experience() {
               />
 
               <div
-                style={{ background:'rgba(8,15,40,0.68)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:'16px',padding:'24px 28px',transition:'all 0.3s ease' }}
+                style={{ background:'var(--card-bg,rgba(8,15,40,0.68))',backdropFilter:'blur(var(--card-blur,20px))',WebkitBackdropFilter:'blur(var(--card-blur,20px))',border:'1px solid var(--card-border,rgba(255,255,255,0.07))',borderRadius:'var(--card-radius,16px)',padding:'24px 28px',transition:'all 0.3s ease' }}
                 onMouseEnter={e=>{const el=e.currentTarget as HTMLElement;el.style.borderColor='rgba(99,102,241,0.30)';el.style.boxShadow='0 8px 40px rgba(99,102,241,0.12)';el.style.transform='translateX(4px)'}}
                 onMouseLeave={e=>{const el=e.currentTarget as HTMLElement;el.style.borderColor='rgba(255,255,255,0.07)';el.style.boxShadow='none';el.style.transform='translateX(0)'}}
               >

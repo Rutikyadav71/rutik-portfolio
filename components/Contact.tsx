@@ -82,12 +82,15 @@ export default function Contact() {
             style={{ display:'flex',flexDirection:'column',gap:'14px' }}
           >
             {LINKS.map(({ icon:Icon,label,value,href,color,glow },i) => (
-              <motion.a key={label} href={href} target={href.startsWith('http')?'_blank':undefined}
-                rel={href.startsWith('http')?'noopener noreferrer':undefined}
+              <motion.a key={label}
+                href={href}
+                onClick={(e) => { if(href.startsWith('mailto:')){ e.preventDefault(); window.location.href = href; } }}
+                target={href.startsWith('mailto:') ? '_self' : '_blank'}
+                rel="noopener noreferrer"
                 initial={{ opacity:0, x:-24 }} animate={inView ? { opacity:1, x:0 } : {}}
                 transition={{ delay:0.22+i*0.08 }}
                 whileHover={{ x:5 }}
-                style={{ display:'flex',alignItems:'center',gap:'16px',padding:'16px 20px',borderRadius:'14px',background:'rgba(8,15,40,0.65)',backdropFilter:'blur(16px)',border:'1px solid rgba(255,255,255,0.06)',textDecoration:'none',transition:'all 0.25s ease' }}
+                style={{ display:'flex',alignItems:'center',gap:'16px',padding:'16px 20px',borderRadius:'14px',background:'var(--card-bg,rgba(8,15,40,0.65))',backdropFilter:'blur(var(--card-blur,16px))',border:'1px solid var(--card-border,rgba(255,255,255,0.06))',textDecoration:'none',transition:'all 0.25s ease' }}
                 onMouseEnter={e=>{const el=e.currentTarget as HTMLElement;el.style.borderColor=`${color}44`;el.style.boxShadow=`0 6px 28px ${glow}`}}
                 onMouseLeave={e=>{const el=e.currentTarget as HTMLElement;el.style.borderColor='rgba(255,255,255,0.06)';el.style.boxShadow='none'}}>
                 <div style={{ width:42,height:42,borderRadius:'10px',background:`${color}14`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}>
@@ -124,7 +127,7 @@ export default function Contact() {
             initial={{ opacity:0, x:44 }} animate={inView ? { opacity:1, x:0 } : {}}
             transition={{ duration:0.65, delay:0.20, ease:[0.22,1,0.36,1] }}
           >
-            <div style={{ background:'rgba(8,15,40,0.70)',backdropFilter:'blur(22px)',WebkitBackdropFilter:'blur(22px)',border:'1px solid rgba(99,102,241,0.18)',borderRadius:'18px',padding:'28px',position:'relative',overflow:'hidden' }}>
+            <div style={{ background:'var(--card-bg,rgba(8,15,40,0.70))',backdropFilter:'blur(var(--card-blur,22px))',WebkitBackdropFilter:'blur(var(--card-blur,22px))',border:'1px solid var(--card-border,rgba(99,102,241,0.18))',borderRadius:'var(--card-radius,18px)',padding:'28px',position:'relative',overflow:'hidden' }}>
               <div style={{ position:'absolute',inset:-1,borderRadius:'18px',background:'linear-gradient(135deg,rgba(99,102,241,0.4),rgba(6,182,212,0.2),rgba(139,92,246,0.3))',zIndex:-1,opacity:0.5 }} />
 
               <div style={{ display:'flex',alignItems:'center',gap:'8px',marginBottom:'24px' }}>

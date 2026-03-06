@@ -44,7 +44,7 @@ export default function Education() {
                 whileHover={{ y:-4, transition:{ duration:0.22 } }}
               >
                 <div
-                  style={{ background:'rgba(8,15,40,0.70)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',border:`1px solid ${a.border}`,borderRadius:'16px',padding:'22px 26px',transition:'all 0.3s ease' }}
+                  style={{ background:'var(--card-bg,rgba(8,15,40,0.70))',backdropFilter:'blur(var(--card-blur,20px))',WebkitBackdropFilter:'blur(var(--card-blur,20px))',border:`1px solid var(--card-border,${a.border})`,borderRadius:'var(--card-radius,16px)',padding:'22px 26px',transition:'all 0.3s ease' }}
                   onMouseEnter={e=>{ (e.currentTarget as HTMLElement).style.boxShadow=`0 8px 40px ${a.glow}` }}
                   onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.boxShadow='none' }}
                 >

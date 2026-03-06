@@ -29,7 +29,7 @@ function SkillCard({ cat, index, inView }: { cat: SkillCategory; index: number; 
       transition={{ duration: 0.55, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
     >
       <div
-        style={{ background:'rgba(8,15,40,0.65)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:'16px',padding:'24px',height:'100%',position:'relative',overflow:'hidden',transition:'all 0.3s ease' }}
+        style={{ background:'var(--card-bg,rgba(8,15,40,0.65))',backdropFilter:'blur(var(--card-blur,20px))',WebkitBackdropFilter:'blur(var(--card-blur,20px))',border:'1px solid var(--card-border,rgba(255,255,255,0.07))',borderRadius:'var(--card-radius,16px)',padding:'24px',height:'100%',position:'relative',overflow:'hidden',transition:'all 0.3s ease' }}
         onMouseEnter={e=>{const el=e.currentTarget as HTMLElement;el.style.borderColor='rgba(99,102,241,0.30)';el.style.boxShadow='0 8px 40px rgba(99,102,241,0.12)';el.style.transform='translateY(-3px)'}}
         onMouseLeave={e=>{const el=e.currentTarget as HTMLElement;el.style.borderColor='rgba(255,255,255,0.07)';el.style.boxShadow='none';el.style.transform='translateY(0)'}}
       >

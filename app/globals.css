@@ -69,6 +69,23 @@ body {
   *, *::before, *::after { cursor: none !important; }
 }
 
+/* ── Restore default cursor when admin is logged in ─────────────── */
+body.admin-mode *,
+body.admin-mode *::before,
+body.admin-mode *::after {
+  cursor: default !important;
+}
+body.admin-mode button,
+body.admin-mode a,
+body.admin-mode [role="button"],
+body.admin-mode input,
+body.admin-mode textarea,
+body.admin-mode select,
+body.admin-mode [style*="cursor:pointer"],
+body.admin-mode [style*="cursor: pointer"] {
+  cursor: pointer !important;
+}
+
 /* ── Skill pill utility ───────────────────────────────────────────── */
 .skill-pill {
   display: inline-block;
@@ -93,13 +110,41 @@ body {
 ════════════════════════════════════════════════════════════════════════ */
 .about-grid {
   display: grid;
-  grid-template-columns: clamp(200px, 28%, 320px) 1fr;
+  grid-template-columns: clamp(180px, 28%, 280px) 1fr;
   gap: clamp(2rem, 5vw, 4rem);
   align-items: start;
 }
 
-@media (max-width: 700px) {
+/* Tablet: side-by-side but tighter */
+@media (max-width: 860px) {
+  .about-grid {
+    grid-template-columns: clamp(150px, 38%, 240px) 1fr;
+    gap: 2rem;
+  }
+}
+
+/* Mobile: stack vertically, center the photo */
+@media (max-width: 640px) {
   .about-grid {
     grid-template-columns: 1fr;
+    gap: 2rem;
   }
+  .about-grid > *:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 280px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+/* ═══════════════════════════════════════════════════════════════════════
+   NAVBAR — responsive desktop/mobile visibility
+═══════════════════════════════════════════════════════════════════════ */
+.nav-desktop { display: flex; }
+.nav-mobile-btn { display: none; }
+
+@media (max-width: 900px) {
+  .nav-desktop { display: none !important; }
+  .nav-mobile-btn { display: flex !important; }
 }

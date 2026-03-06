@@ -50,7 +50,7 @@ export default function Certificates() {
                 transition={{ duration:0.55,delay:i*0.10,ease:[0.22,1,0.36,1] }}
                 whileHover={{ y:-4,transition:{ duration:0.22 } }}>
                 <div
-                  style={{ background:'rgba(8,15,40,0.72)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',border:`1px solid ${c.border}`,borderRadius:'16px',padding:'20px 22px',position:'relative',transition:'box-shadow 0.3s ease',height:'100%',boxSizing:'border-box' }}
+                  style={{ background:'var(--card-bg,rgba(8,15,40,0.72))',backdropFilter:'blur(var(--card-blur,20px))',WebkitBackdropFilter:'blur(var(--card-blur,20px))',border:`1px solid var(--card-border,${c.border})`,borderRadius:'var(--card-radius,16px)',padding:'20px 22px',position:'relative',transition:'box-shadow 0.3s ease',height:'100%',boxSizing:'border-box' }}
                   onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.boxShadow=`0 8px 36px ${c.glow}`}}
                   onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.boxShadow='none'}}>
 

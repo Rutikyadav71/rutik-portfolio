@@ -14,7 +14,7 @@ import { EditableText }  from '@/components/admin/EditableText'
 const SL: React.CSSProperties   = { fontFamily:'"JetBrains Mono",monospace',fontSize:'0.70rem',letterSpacing:'0.28em',textTransform:'uppercase',color:'#06b6d4',marginBottom:'12px',display:'block' }
 const H2: React.CSSProperties   = { fontFamily:'Syne,sans-serif',fontWeight:800,fontSize:'clamp(2rem,4.5vw,3.2rem)',color:'#f1f5f9',margin:0,lineHeight:1.1 }
 const GRAD: React.CSSProperties = { background:'linear-gradient(135deg,#818cf8,#06b6d4)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text' }
-const CARD: React.CSSProperties = { background:'rgba(8,15,40,0.65)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:'16px',padding:'18px 22px' }
+const CARD: React.CSSProperties = { background:'var(--card-bg,rgba(8,15,40,0.65))',backdropFilter:'blur(var(--card-blur,20px))',WebkitBackdropFilter:'blur(var(--card-blur,20px))',border:'1px solid var(--card-border,rgba(255,255,255,0.07))',borderRadius:'var(--card-radius,16px)',padding:'18px 22px' }
 
 const spring = (delay=0) => ({ duration:0.70,delay,ease:[0.22,1,0.36,1] as [number,number,number,number] })
 const UP     = { hidden:{ opacity:0,y:36  }, visible:{ opacity:1,y:0  } }
@@ -140,7 +140,7 @@ function PhotoEditorModal({
             </p>
 
             {/* Photo preview */}
-            <div style={{ position:'relative',width:`${cfg.size}px`,height:`${cfg.size * (shape.aspect==='3/4'? 4/3 : shape.aspect==='4/3'? 3/4 : 1)}px`,maxWidth:'220px',maxHeight:'300px' }}>
+            <div style={{ position:'relative',width:'100%',maxWidth:'200px',aspectRatio:shape.aspect,margin:'0 auto' }}>
               {/* Frame glow */}
               <div style={{ position:'absolute',inset:'-3px',borderRadius:shape.radius,background:style.gradient,zIndex:0,filter:'blur(1px)' }}/>
               {/* Photo container */}
@@ -328,17 +328,17 @@ export default function About() {
             {/* Photo frame */}
             <motion.div
               whileHover={{ scale:1.02 }} transition={{ duration:0.35 }}
-              style={{ position:'relative', width:'fit-content' }}
+              style={{ position:'relative', width:'100%', maxWidth:`${frameConfig.size}px` }}
             >
               {/* Gradient border glow */}
-              <div style={{ position:'absolute',inset:'-3px',borderRadius:shapeInfo.radius,background:styleInfo.gradient !== 'transparent' ? styleInfo.gradient : 'var(--frame-glow, linear-gradient(135deg,rgba(99,102,241,0.70),rgba(6,182,212,0.60),rgba(139,92,246,0.65)))',zIndex:0,filter:'blur(1px)' }}/>
+              <div style={{ position:'absolute',inset:'-3px',borderRadius:shapeInfo.radius,background:styleInfo.gradient !== 'transparent' ? styleInfo.gradient : 'var(--frame-glow, linear-gradient(135deg,rgba(99,102,241,0.70),rgba(6,182,212,0.60),rgba(139,92,246,0.65)))',zIndex:0,filter:'blur(2px)' }}/>
 
               {/* Photo container — shape-controlled */}
               <div style={{
                 position:'relative',zIndex:1,
                 borderRadius: shapeInfo.radius,
                 overflow:'hidden',
-                width: `${frameConfig.size}px`,
+                width: '100%',
                 aspectRatio: aspectMap[frameConfig.shape],
                 background:'var(--frame-bg, rgba(8,15,40,0.8))',
                 border:'var(--frame-thickness, 2px) solid var(--frame-border, rgba(99,102,241,0.25))',

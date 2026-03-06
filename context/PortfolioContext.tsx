@@ -13,6 +13,16 @@ export interface ExperienceItem { id: string; company: string; role: string; per
 export interface EducationItem  { id: string; degree: string; institution: string; period: string; score: string; scoreValue: number; badge: string }
 export interface Language       { id: string; name: string; level: string }
 export interface Certificate    { id: string; title: string; issuer: string; date: string; credentialUrl: string }
+export interface CodingLink     { id: string; platform: string; url: string; username: string; iconType: string }
+export type SocialIconType = 'github'|'linkedin'|'mail'|'twitter'|'instagram'|'youtube'|'globe'|'discord'|'telegram'|'whatsapp'|'link'
+export interface SocialLink {
+  id: string; type: SocialIconType; href: string; label: string
+}
+export interface SocialStyle {
+  size: number; iconSize: number
+  bg: string; border: string; color: string; hoverColor: string
+  borderRadius: number; gap: number
+}
 
 export interface FrameConfig {
   shape: 'portrait' | 'square' | 'circle' | 'wide'
@@ -25,8 +35,12 @@ export interface PortfolioData {
     name: string; roles: string[]; tagline: string
     location: string; available: boolean
     resumeUrl: string
-    nameStyle: { fontSize: string; fontFamily: string; color: string }
+    nameStyle: { fontSize: string; fontFamily: string; color: string; fontWeight?: string }
     roleStyle: { fontSize: string; fontFamily: string; color: string; useGradient: boolean }
+    roleAnimStyle: 'typewriter' | 'fade' | 'slide' | 'bounce'
+    badgeText: string
+    socialLinks: SocialLink[]
+    socialStyle: SocialStyle
   }
   about: {
     bio1: string; bio2: string; bio3: string; bio4: string
@@ -41,6 +55,12 @@ export interface PortfolioData {
   experience:   ExperienceItem[]
   education:    EducationItem[]
   certificates: Certificate[]
+  linksSection: {
+    enabled:  boolean
+    title:    string
+    subtitle: string
+    links:    CodingLink[]
+  }
 }
 
 const PORTFOLIO_LS_KEY = 'portfolio_data_v1'
@@ -64,6 +84,15 @@ interface PortfolioContextType {
   updateCertificate: (id: string, val: Partial<Certificate>) => void
   removeCertificate: (id: string) => void
   saveToCloud: () => Promise<void>
+  addSocialLink:    () => void
+  updateSocialLink: (id: string, val: Partial<SocialLink>) => void
+  removeSocialLink: (id: string) => void
+  updateSocialStyle:(val: Partial<SocialStyle>) => void
+  resetSocialStyle: () => void
+  updateLinksSection: (val: Partial<PortfolioData['linksSection']>) => void
+  addCodingLink:      () => void
+  updateCodingLink:   (id: string, val: Partial<CodingLink>) => void
+  removeCodingLink:   (id: string) => void
 }
 
 const PortfolioContext = createContext<PortfolioContextType | null>(null)
@@ -77,8 +106,21 @@ const DEFAULT_DATA: PortfolioData = {
     location: "Pune, Maharashtra, India \u00b7 Computer Engineering '26",
     available: true,
     resumeUrl: '',
-    nameStyle: { fontSize: 'clamp(3.2rem,8vw,5.5rem)', fontFamily: 'Syne,sans-serif', color: '#f1f5f9' },
+    nameStyle: { fontSize: 'clamp(3.2rem,8vw,5.5rem)', fontFamily: 'Syne,sans-serif', color: '#f1f5f9', fontWeight: '900' },
     roleStyle: { fontSize: 'clamp(1.2rem,3vw,1.65rem)', fontFamily: 'Syne,sans-serif', color: '#818cf8', useGradient: true },
+    roleAnimStyle: 'typewriter',
+    badgeText: '✦ Available for opportunities',
+    socialLinks: [
+      { id: '1', type: 'github',   href: 'https://github.com/Rutikyadav71',               label: 'GitHub'   },
+      { id: '2', type: 'linkedin', href: 'https://linkedin.com/in/rutik-yadav-770159296', label: 'LinkedIn' },
+      { id: '3', type: 'mail',     href: 'mailto:rutikyadav2004@gmail.com',               label: 'Email'    },
+    ],
+    socialStyle: {
+      size: 44, iconSize: 19,
+      bg: 'rgba(8,15,40,0.70)', border: 'rgba(255,255,255,0.06)',
+      color: '#94a3b8', hoverColor: '#f1f5f9',
+      borderRadius: 12, gap: 10,
+    },
   },
   about: {
     bio1: "I'm a Computer Engineering undergraduate (Class of 2026) from Sinhgad Academy of Engineering, Pune, with a CGPA of 8.13.",
@@ -145,6 +187,16 @@ const DEFAULT_DATA: PortfolioData = {
   certificates: [
     { id: '1', title: 'Java Full Stack Development', issuer: 'SystemTron', date: 'Mar 2025', credentialUrl: '' },
   ],
+  linksSection: {
+    enabled:  false,
+    title:    'My Coding Profiles',
+    subtitle: 'DSA practice, competitive programming & problem solving',
+    links: [
+      { id: '1', platform: 'LeetCode',        url: 'https://leetcode.com/',         username: 'your-username', iconType: 'leetcode'  },
+      { id: '2', platform: 'GeeksForGeeks',   url: 'https://www.geeksforgeeks.org/',username: 'your-username', iconType: 'gfg'       },
+      { id: '3', platform: 'HackerRank',      url: 'https://www.hackerrank.com/',   username: 'your-username', iconType: 'hackerrank'},
+    ],
+  },
 }
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
@@ -158,8 +210,15 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
       const raw = localStorage.getItem(PORTFOLIO_LS_KEY)
       if (raw) {
         const saved = JSON.parse(raw) as Partial<PortfolioData>
+        if (!saved.linksSection) saved.linksSection = DEFAULT_DATA.linksSection
         if (saved.projects) {
           saved.projects = saved.projects.map((p: Partial<Project>) => ({ images: [] as string[], projectTag: 'Full Stack' as string, ...p } as Project))
+        }
+        if (!saved.hero?.socialLinks) {
+          if (saved.hero) {
+            saved.hero.socialLinks = DEFAULT_DATA.hero.socialLinks
+            saved.hero.socialStyle = DEFAULT_DATA.hero.socialStyle
+          }
         }
         if (saved.about && !saved.about.frameConfig) {
           saved.about.frameConfig = { shape: 'portrait', style: 'gradient', size: 220 }
@@ -181,8 +240,17 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
           if (loaded.projects) {
             loaded.projects = loaded.projects.map((p: Partial<Project>) => ({ images: [] as string[], projectTag: 'Full Stack' as string, ...p } as Project))
           }
+          if (!loaded.hero?.socialLinks) {
+            if (loaded.hero) {
+              loaded.hero.socialLinks = DEFAULT_DATA.hero.socialLinks
+              loaded.hero.socialStyle = DEFAULT_DATA.hero.socialStyle
+            }
+          }
           if (loaded.about && !loaded.about.frameConfig) {
             loaded.about.frameConfig = { shape: 'portrait', style: 'gradient', size: 220 }
+          }
+          if (!loaded.linksSection) {
+            loaded.linksSection = DEFAULT_DATA.linksSection
           }
           setData(prev => {
             const next = { ...prev, ...loaded }
@@ -244,6 +312,43 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
 
   const updateEducation = (id: string, val: Partial<EducationItem>) => setData(d => ({ ...d, education: d.education.map(e => e.id===id?{...e,...val}:e) }))
 
+  const addSocialLink = () => setData(d => {
+    const next = { ...d, hero: { ...d.hero, socialLinks: [...(d.hero.socialLinks||[]), { id: Date.now().toString(), type: 'link' as SocialIconType, href: 'https://', label: 'Link' }] } }
+    persist(next); return next
+  })
+  const updateSocialLink = (id: string, val: Partial<SocialLink>) => setData(d => {
+    const next = { ...d, hero: { ...d.hero, socialLinks: (d.hero.socialLinks||[]).map(s => s.id===id?{...s,...val}:s) } }
+    persist(next); return next
+  })
+  const removeSocialLink = (id: string) => setData(d => {
+    const next = { ...d, hero: { ...d.hero, socialLinks: (d.hero.socialLinks||[]).filter(s => s.id!==id) } }
+    persist(next); return next
+  })
+  const updateSocialStyle = (val: Partial<SocialStyle>) => setData(d => {
+    const next = { ...d, hero: { ...d.hero, socialStyle: { ...(d.hero.socialStyle||DEFAULT_DATA.hero.socialStyle), ...val } } }
+    persist(next); return next
+  })
+  const resetSocialStyle = () => setData(d => {
+    const next = { ...d, hero: { ...d.hero, socialStyle: DEFAULT_DATA.hero.socialStyle } }
+    persist(next); return next
+  })
+
+  const updateLinksSection = (val: Partial<PortfolioData['linksSection']>) => setData(d => {
+    const next = { ...d, linksSection: { ...d.linksSection, ...val } }; persist(next); return next
+  })
+  const addCodingLink = () => setData(d => {
+    const next = { ...d, linksSection: { ...d.linksSection, links: [...(d.linksSection.links||[]), { id: Date.now().toString(), platform: 'Platform', url: 'https://', username: 'username', iconType: 'link' }] } }
+    persist(next); return next
+  })
+  const updateCodingLink = (id: string, val: Partial<CodingLink>) => setData(d => {
+    const next = { ...d, linksSection: { ...d.linksSection, links: (d.linksSection.links||[]).map(l => l.id===id?{...l,...val}:l) } }
+    persist(next); return next
+  })
+  const removeCodingLink = (id: string) => setData(d => {
+    const next = { ...d, linksSection: { ...d.linksSection, links: (d.linksSection.links||[]).filter(l => l.id!==id) } }
+    persist(next); return next
+  })
+
   const addCertificate    = ()                                     => setData(d => ({ ...d, certificates: [...(d.certificates||[]), { id: Date.now().toString(), title: 'Certificate Title', issuer: 'Issuer / Platform', date: '2025', credentialUrl: '' }] }))
   const updateCertificate = (id: string, val: Partial<Certificate>) => setData(d => ({ ...d, certificates: (d.certificates||[]).map(c => c.id===id?{...c,...val}:c) }))
   const removeCertificate = (id: string)                            => setData(d => ({ ...d, certificates: (d.certificates||[]).filter(c => c.id!==id) }))
@@ -258,6 +363,8 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
       updateExperience, addExperience,
       updateEducation,
       addCertificate, updateCertificate, removeCertificate,
+      addSocialLink, updateSocialLink, removeSocialLink, updateSocialStyle, resetSocialStyle,
+      updateLinksSection, addCodingLink, updateCodingLink, removeCodingLink,
       saveToCloud,
     }}>
       {children}
