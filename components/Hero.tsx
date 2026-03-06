@@ -1,5 +1,5 @@
 'use client'
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
+import { motion, useScroll, useTransform, AnimatePresence, type Transition } from 'framer-motion'
 import { TypeAnimation } from 'react-type-animation'
 import { Github, Linkedin, Mail, Twitter, Instagram, Youtube, Globe, MessageSquare, Send, Phone, Link as LinkIcon, ArrowDown, Download, Eye, Palette, X, Plus, Trash2, Settings2, RotateCcw } from 'lucide-react'
 import { useRef, useState, useEffect } from 'react'
@@ -354,6 +354,112 @@ function RolePanel({roles,animStyle,rs,onRolesChange,onAnimChange,onRsChange,onC
   )
 }
 
+// ── SOCIAL ICON WITH TOOLTIP ──────────────────────────────────────────────────
+function SocialIconWithTooltip({link,Icon,isMail,displayVal,socialStyle,delay}:{
+  link: SocialLink
+  Icon: React.ElementType
+  isMail: boolean
+  displayVal: string
+  socialStyle: typeof DEFAULT_SOCIAL_STYLE
+  delay: number
+}) {
+  const [hovered,setHovered]=useState(false)
+  const preset=SOCIAL_PRESETS.find(p=>p.type===link.type)
+  const label=preset?.label??link.label??link.type
+
+  return (
+    <div style={{position:'relative',flexShrink:0,display:'inline-flex'}}
+      onMouseEnter={()=>setHovered(true)}
+      onMouseLeave={()=>setHovered(false)}>
+
+      {/* Tooltip */}
+      <AnimatePresence>
+        {hovered && (
+          <motion.div
+            initial={{opacity:0,y:6,scale:0.88}}
+            animate={{opacity:1,y:0,scale:1}}
+            exit={{opacity:0,y:6,scale:0.88}}
+            transition={{duration:0.18,ease:'easeOut'}}
+            style={{
+              position:'absolute',
+              bottom:`calc(100% + 10px)`,
+              left:'50%',
+              transform:'translateX(-50%)',
+              zIndex:9999,
+              pointerEvents:'none',
+              whiteSpace:'nowrap',
+            }}>
+            {/* Card */}
+            <div style={{
+              background:'rgba(8,12,35,0.96)',
+              border:'1px solid rgba(99,102,241,0.35)',
+              borderRadius:'10px',
+              padding:'7px 12px',
+              backdropFilter:'blur(16px)',
+              WebkitBackdropFilter:'blur(16px)',
+              boxShadow:'0 8px 32px rgba(0,0,0,0.55),0 0 0 1px rgba(99,102,241,0.10)',
+              display:'flex',flexDirection:'column',alignItems:'center',gap:'2px',
+            }}>
+              <span style={{
+                fontFamily:'"JetBrains Mono",monospace',
+                fontSize:'0.60rem',
+                letterSpacing:'0.12em',
+                textTransform:'uppercase',
+                color:'#6366f1',
+                fontWeight:600,
+              }}>{label}</span>
+              <span style={{
+                fontFamily:'"Inter",sans-serif',
+                fontSize:'0.72rem',
+                color:'#cbd5e1',
+                fontWeight:400,
+                maxWidth:'220px',
+                overflow:'hidden',
+                textOverflow:'ellipsis',
+              }}>{displayVal}</span>
+            </div>
+            {/* Arrow */}
+            <div style={{
+              position:'absolute',
+              bottom:'-5px',
+              left:'50%',
+              transform:'translateX(-50%) rotate(45deg)',
+              width:'9px',height:'9px',
+              background:'rgba(8,12,35,0.96)',
+              border:'1px solid rgba(99,102,241,0.35)',
+              borderTop:'none',borderLeft:'none',
+            }}/>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Icon button */}
+      <motion.a
+        href={isMail?undefined:link.href}
+        onClick={isMail?(e)=>{e.preventDefault();window.location.href=link.href}:undefined}
+        target={isMail?undefined:'_blank'} rel="noopener noreferrer" aria-label={link.label}
+        initial={{opacity:0,scale:0.5}} animate={{opacity:1,scale:1}}
+        transition={{delay,type:'spring',stiffness:360}}
+        whileHover={{scale:1.18,y:-3}} whileTap={{scale:0.92}}
+        style={{
+          display:'flex',alignItems:'center',justifyContent:'center',
+          width:`${socialStyle.size}px`,height:`${socialStyle.size}px`,
+          borderRadius:`${socialStyle.borderRadius}px`,
+          background:hovered?'rgba(99,102,241,0.15)':socialStyle.bg,
+          backdropFilter:'blur(12px)',WebkitBackdropFilter:'blur(12px)',
+          border:`1px solid ${hovered?'rgba(99,102,241,0.45)':socialStyle.border}`,
+          color:hovered?socialStyle.hoverColor:socialStyle.color,
+          textDecoration:'none',cursor:'pointer',
+          boxShadow:hovered?'0 0 20px rgba(99,102,241,0.25)':'none',
+          transition:'color 0.2s,border-color 0.2s,box-shadow 0.2s,background 0.2s',
+          flexShrink:0,
+        }}>
+        <Icon size={socialStyle.iconSize}/>
+      </motion.a>
+    </div>
+  )
+}
+
 // ── ANIMATED ROLE ─────────────────────────────────────────────────────────────
 function AnimRole({roles,rs,animStyle}:{
   roles:string[]
@@ -379,9 +485,9 @@ function AnimRole({roles,rs,animStyle}:{
   }
 
   const variants={
-    fade:  {init:{opacity:0},         anim:{opacity:1},          exit:{opacity:0},          trans:{duration:0.55,ease:'easeInOut'}},
-    slide: {init:{opacity:0,y:40},    anim:{opacity:1,y:0},      exit:{opacity:0,y:-40},     trans:{duration:0.45,ease:[0.22,1,0.36,1] as [number,number,number,number]}},
-    bounce:{init:{opacity:0,scale:0.55},anim:{opacity:1,scale:1},exit:{opacity:0,scale:0.55},trans:{type:'spring' as const,stiffness:280,damping:20}},
+    fade:  {init:{opacity:0},         anim:{opacity:1},          exit:{opacity:0},          trans:{duration:0.55,ease:'easeInOut'} as Transition},
+    slide: {init:{opacity:0,y:40},    anim:{opacity:1,y:0},      exit:{opacity:0,y:-40},     trans:{duration:0.45,ease:[0.22,1,0.36,1] as [number,number,number,number]} as Transition},
+    bounce:{init:{opacity:0,scale:0.55},anim:{opacity:1,scale:1},exit:{opacity:0,scale:0.55},trans:{type:'spring' as const,stiffness:280,damping:20} as Transition},
   }[animStyle]
 
   return (
@@ -753,19 +859,30 @@ export default function Hero() {
                 {socialLinks.map((link,i)=>{
                   const Icon=SOCIAL_ICON_MAP[link.type]??LinkIcon
                   const isMail=link.href.startsWith('mailto:')
+                  const isPhone=link.href.startsWith('tel:')||link.type==='whatsapp'
+                  // Derive a clean display value for the tooltip
+                  const displayVal=(()=>{
+                    if(isMail) return link.href.replace('mailto:','')
+                    if(link.href.startsWith('tel:')) return link.href.replace('tel:','')
+                    if(link.type==='whatsapp'){
+                      const m=link.href.match(/wa\.me\/(\+?\d+)/)
+                      return m?.[1]??link.href
+                    }
+                    try{
+                      const u=new URL(link.href)
+                      return (u.hostname+u.pathname).replace(/\/$/,'')
+                    }catch{return link.href}
+                  })()
                   return (
-                    <motion.a key={link.id}
-                      href={isMail?undefined:link.href}
-                      onClick={isMail?(e)=>{e.preventDefault();window.location.href=link.href}:undefined}
-                      target={isMail?undefined:'_blank'} rel="noopener noreferrer" aria-label={link.label}
-                      initial={{opacity:0,scale:0.5}} animate={{opacity:1,scale:1}}
-                      transition={{delay:0.78+i*0.08,type:'spring',stiffness:360}}
-                      whileHover={{scale:1.18,y:-3}} whileTap={{scale:0.92}}
-                      style={{display:'flex',alignItems:'center',justifyContent:'center',width:`${socialStyle.size}px`,height:`${socialStyle.size}px`,borderRadius:`${socialStyle.borderRadius}px`,background:socialStyle.bg,backdropFilter:'blur(12px)',WebkitBackdropFilter:'blur(12px)',border:`1px solid ${socialStyle.border}`,color:socialStyle.color,textDecoration:'none',cursor:'pointer',transition:'color 0.2s,border-color 0.2s,box-shadow 0.2s',flexShrink:0}}
-                      onMouseEnter={e=>{const el=e.currentTarget as HTMLAnchorElement;el.style.color=socialStyle.hoverColor;el.style.borderColor='rgba(99,102,241,0.45)';el.style.boxShadow='0 0 20px rgba(99,102,241,0.25)'}}
-                      onMouseLeave={e=>{const el=e.currentTarget as HTMLAnchorElement;el.style.color=socialStyle.color;el.style.borderColor=socialStyle.border;el.style.boxShadow='none'}}>
-                      <Icon size={socialStyle.iconSize}/>
-                    </motion.a>
+                    <SocialIconWithTooltip
+                      key={link.id}
+                      link={link}
+                      Icon={Icon}
+                      isMail={isMail}
+                      displayVal={displayVal}
+                      socialStyle={socialStyle}
+                      delay={0.78+i*0.08}
+                    />
                   )
                 })}
                 {isEditMode && socialLinks.length===0 && (
