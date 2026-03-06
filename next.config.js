@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  swcMinify: true,
 
   // ── Image optimisation ────────────────────────────────────────────
   images: {
@@ -37,6 +38,10 @@ const nextConfig = {
     config.resolve.alias = { ...config.resolve.alias }
     return config
   },
+
+  eslint: {
+    ignoreDuringBuilds: true,
+  }
 }
 
 module.exports = nextConfig

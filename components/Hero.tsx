@@ -1,7 +1,7 @@
 'use client'
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import { TypeAnimation } from 'react-type-animation'
-import { Github, Linkedin, Mail, Twitter, Instagram, Youtube, Globe, MessageSquare, Send, Phone, Link as LinkIcon, ArrowDown, Download, Eye, Palette, X, Plus, Trash2, Settings2, RotateCcw, GripHorizontal } from 'lucide-react'
+import { Github, Linkedin, Mail, Twitter, Instagram, Youtube, Globe, MessageSquare, Send, Phone, Link as LinkIcon, ArrowDown, Download, Eye, Palette, X, Plus, Trash2, Settings2, RotateCcw } from 'lucide-react'
 import { useRef, useState, useEffect } from 'react'
 import { usePortfolio } from '@/context/PortfolioContext'
 import type { SocialLink, SocialIconType } from '@/context/PortfolioContext'
@@ -724,7 +724,7 @@ export default function Hero() {
                 View My Work →
               </motion.button>
               <motion.button
-                onClick={()=>{ if(!resumeUrl){alert('No resume URL set yet.\n\nGo to Edit Mode → click "Resume ✎" in the navbar.');return} setShowResume(true) }}
+                onClick={()=>{ if(!resumeUrl){alert('No resume URL set yet.\n\nGo to Edit Mode → click Resume ✎ in the navbar.');return} setShowResume(true) }}
                 whileHover={{scale:1.04,y:-2}} whileTap={{scale:0.97}}
                 style={{display:'inline-flex',alignItems:'center',gap:'8px',padding:'14px 22px',borderRadius:'14px',border:'1px solid rgba(99,102,241,0.45)',cursor:'pointer',background:'transparent',color:'#818cf8',fontSize:'1rem',fontFamily:'Syne,sans-serif',fontWeight:600}}>
                 <Eye size={16}/> View CV

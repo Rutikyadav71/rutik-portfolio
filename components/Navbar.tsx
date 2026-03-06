@@ -54,7 +54,7 @@ export default function Navbar() {
 
   const handleResumeClick = () => {
     if (isEditMode) { setUrlDraft(resumeUrl); setEditingUrl(true); return }
-    if (!resumeUrl) { alert('No resume URL set.\n\nEnter Edit Mode and click "Resume ✎" to add your PDF link.'); return }
+    if (!resumeUrl) {alert('No resume URL set.\n\nEnter Edit Mode and click Resume ✎ to add your PDF link.'); return }
     setShowModal(true)
   }
 
