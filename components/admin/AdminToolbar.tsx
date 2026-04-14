@@ -8,6 +8,13 @@ import {
   BookmarkCheck, BookmarkPlus, Trash2, type LucideIcon,
 } from 'lucide-react'
 import { useAdmin }     from '@/context/AdminContext'
+import {
+  getSecurityState, recordFailedAttempt, recordSuccess,
+  isLockedOut, remainingAttempts, lockoutCountdown,
+  tryUnlockFromUrl, LOGIN_MAX_ATTEMPTS,
+  type LoginSecurityState,
+} from '@/lib/loginSecurity'
+import { sendSecurityAlert } from '@/lib/sendSecurityAlert'
 import { usePortfolio } from '@/context/PortfolioContext'
 import { useTheme, ThemeSettings, DEFAULT_THEME } from '@/context/ThemeContext'
 
@@ -438,14 +445,13 @@ export default function AdminToolbar() {
   const [loginLoading, setLoginLoading] = useState(false)
   const [loginError,   setLoginError]   = useState('')
   const [saved,        setSaved]        = useState(false)
+  const [secState,     setSecState]     = useState<LoginSecurityState>(() => getSecurityState())
+  const [countdown,    setCountdown]    = useState('')
 
   // Add/remove admin-mode class on body for cursor management
   useEffect(() => {
-    if (isAdmin) {
-      document.body.classList.add('admin-mode')
-    } else {
-      document.body.classList.remove('admin-mode')
-    }
+    if (isAdmin) document.body.classList.add('admin-mode')
+    else         document.body.classList.remove('admin-mode')
     return () => document.body.classList.remove('admin-mode')
   }, [isAdmin])
 
@@ -454,20 +460,73 @@ export default function AdminToolbar() {
     if (!isEditMode) setShowDesign(false)
   }, [isEditMode])
 
+  // Check URL unlock token on mount
+  useEffect(() => {
+    if (tryUnlockFromUrl()) {
+      setSecState(getSecurityState())
+    }
+  }, [])
+
+  // Live countdown timer when locked out
+  useEffect(() => {
+    if (!isLockedOut(secState)) return
+    const tick = () => {
+      const s = getSecurityState()
+      setSecState(s)
+      setCountdown(lockoutCountdown(s))
+      if (!isLockedOut(s)) setCountdown('')
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [secState.lockedUntil])
+
   if (loading) return null
 
+  const locked = isLockedOut(secState)
+  const attemptsLeft = remainingAttempts(secState)
+
   const openLogin = () => {
+    const s = getSecurityState()
+    setSecState(s)
+    if (isLockedOut(s)) return          // already locked, button shouldn't be clickable
     if (!supabaseReady) setShowWarning(true)
     else { setShowLogin(true); setLoginError('') }
   }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    // Re-check lockout (race condition guard)
+    const s = getSecurityState()
+    if (isLockedOut(s)) { setSecState(s); return }
+
     setLoginLoading(true); setLoginError('')
     const { error } = await signIn(email, password)
     setLoginLoading(false)
-    if (error) setLoginError(error)
-    else { setShowLogin(false); setEmail(''); setPassword('') }
+
+    if (error) {
+      const newState = recordFailedAttempt()
+      setSecState(newState)
+
+      if (isLockedOut(newState)) {
+        // Send security alert email
+        sendSecurityAlert({
+          unlockToken:  newState.unlockToken,
+          attemptCount: newState.attempts,
+          timestamp:    new Date().toLocaleString('en-IN', { timeZone:'Asia/Kolkata' }),
+          userAgent:    navigator.userAgent,
+        })
+        setShowLogin(false)
+        setEmail(''); setPassword('')
+      } else {
+        const left = remainingAttempts(newState)
+        setLoginError(`${error}\n\n${left} attempt${left===1?'':'s'} remaining.`)
+      }
+    } else {
+      recordSuccess()
+      setSecState(getSecurityState())
+      setShowLogin(false); setEmail(''); setPassword('')
+    }
   }
 
   const handleSave = async () => {
@@ -481,9 +540,9 @@ export default function AdminToolbar() {
         initial={{opacity:0,scale:0.5}} animate={{opacity:1,scale:1}}
         transition={{delay:2.5,type:'spring',stiffness:280,damping:22}}
         onClick={isAdmin ? undefined : openLogin}
-        title={isAdmin?'Admin active':'Admin Login'}
-        style={{ position:'fixed',bottom:'24px',right:'24px',zIndex:9997,width:'46px',height:'46px',borderRadius:'13px',display:'flex',alignItems:'center',justifyContent:'center',background:isAdmin?'linear-gradient(135deg,rgba(52,211,153,0.18),rgba(6,182,212,0.18))':'rgba(8,15,40,0.88)',border:isAdmin?'1px solid rgba(52,211,153,0.45)':'1px solid rgba(99,102,241,0.28)',color:isAdmin?'#34d399':'#64748b',cursor:isAdmin?'default':'pointer',backdropFilter:'blur(16px)',boxShadow:isAdmin?'0 0 20px rgba(52,211,153,0.22),0 4px 20px rgba(0,0,0,0.5)':'0 4px 20px rgba(0,0,0,0.5)',transition:'all 0.3s ease' }}>
-        {isAdmin ? <Shield size={18}/> : <Settings size={18}/>}
+        title={isAdmin?'Admin active': locked ? `Login locked — ${lockoutCountdown(secState)}` : 'Admin Login'}
+        style={{ position:'fixed',bottom:'24px',right:'24px',zIndex:9997,width:'46px',height:'46px',borderRadius:'13px',display:'flex',alignItems:'center',justifyContent:'center',background:isAdmin?'linear-gradient(135deg,rgba(52,211,153,0.18),rgba(6,182,212,0.18))':locked?'rgba(40,10,10,0.90)':'rgba(8,15,40,0.88)',border:isAdmin?'1px solid rgba(52,211,153,0.45)':locked?'1px solid rgba(239,68,68,0.45)':'1px solid rgba(99,102,241,0.28)',color:isAdmin?'#34d399':locked?'#f87171':'#64748b',cursor:isAdmin?'default':'pointer',backdropFilter:'blur(16px)',boxShadow:isAdmin?'0 0 20px rgba(52,211,153,0.22),0 4px 20px rgba(0,0,0,0.5)':locked?'0 0 16px rgba(239,68,68,0.20),0 4px 20px rgba(0,0,0,0.5)':'0 4px 20px rgba(0,0,0,0.5)',transition:'all 0.3s ease' }}>
+        {isAdmin ? <Shield size={18}/> : locked ? <AlertTriangle size={18}/> : <Settings size={18}/>}
       </motion.button>
 
       {/* ── Admin toolbar (floats above gear button) ── */}
@@ -556,56 +615,97 @@ export default function AdminToolbar() {
         {showWarning && <ConfigWarning onClose={()=>setShowWarning(false)}/>}
       </AnimatePresence>
 
-      {/* ── Login modal ── */}
+      {/* ── Login modal (brute-force protected) ── */}
       <AnimatePresence>
         {showLogin && (
           <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
             onClick={()=>setShowLogin(false)}
-            style={{ position:'fixed',inset:0,zIndex:99998,display:'flex',alignItems:'center',justifyContent:'center',padding:'20px',background:'rgba(0,0,0,0.75)',backdropFilter:'blur(12px)' }}>
+            style={{ position:'fixed',inset:0,zIndex:99998,display:'flex',alignItems:'center',justifyContent:'center',padding:'20px',background:'rgba(0,0,0,0.80)',backdropFilter:'blur(14px)' }}>
             <motion.div initial={{scale:0.88,opacity:0,y:32}} animate={{scale:1,opacity:1,y:0}} exit={{scale:0.88,opacity:0,y:32}}
               transition={{type:'spring',stiffness:320,damping:26}}
               onClick={e=>e.stopPropagation()}
               style={{ position:'relative',width:'100%',maxWidth:'400px' }}>
-              <div style={{ position:'relative',background:'rgba(5,10,28,0.97)',border:'1px solid rgba(99,102,241,0.28)',borderRadius:'22px',padding:'36px',boxShadow:'0 0 60px rgba(99,102,241,0.18),0 30px 80px rgba(0,0,0,0.7)' }}>
+              <div style={{ position:'relative',background:'rgba(5,10,28,0.98)',border:`1px solid ${locked?'rgba(239,68,68,0.40)':'rgba(99,102,241,0.28)'}`,borderRadius:'22px',padding:'36px',boxShadow:`0 0 60px ${locked?'rgba(239,68,68,0.15)':'rgba(99,102,241,0.18)'},0 30px 80px rgba(0,0,0,0.7)` }}>
                 <button onClick={()=>setShowLogin(false)}
                   style={{ position:'absolute',top:'16px',right:'16px',width:'30px',height:'30px',borderRadius:'8px',display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)',color:'#475569',cursor:'pointer' }}>
                   <X size={14}/>
                 </button>
                 <div style={{ display:'flex',alignItems:'center',gap:'14px',marginBottom:'28px' }}>
-                  <motion.div animate={{rotate:[0,-6,6,0]}} transition={{duration:3,repeat:Infinity,repeatDelay:2}}
-                    style={{ width:'48px',height:'48px',borderRadius:'14px',display:'flex',alignItems:'center',justifyContent:'center',background:'linear-gradient(135deg,rgba(99,102,241,0.20),rgba(139,92,246,0.15))',border:'1px solid rgba(99,102,241,0.30)',color:'#818cf8' }}>
-                    <Lock size={22}/>
+                  <motion.div
+                    animate={locked?{rotate:[0,8,-8,0],scale:[1,1.05,1]}:{rotate:[0,-6,6,0]}}
+                    transition={locked?{duration:0.5,repeat:3}:{duration:3,repeat:Infinity,repeatDelay:2}}
+                    style={{ width:'48px',height:'48px',borderRadius:'14px',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',background:locked?'linear-gradient(135deg,rgba(239,68,68,0.20),rgba(239,68,68,0.10))':'linear-gradient(135deg,rgba(99,102,241,0.20),rgba(139,92,246,0.15))',border:`1px solid ${locked?'rgba(239,68,68,0.40)':'rgba(99,102,241,0.30)'}`,color:locked?'#f87171':'#818cf8' }}>
+                    {locked ? <AlertTriangle size={22}/> : <Lock size={22}/>}
                   </motion.div>
                   <div>
-                    <h2 style={{ margin:0,fontFamily:'Syne,sans-serif',fontWeight:800,fontSize:'1.3rem',color:'#f1f5f9' }}>Admin Login</h2>
-                    <p style={{ margin:'3px 0 0',fontSize:'0.78rem',fontFamily:'"JetBrains Mono",monospace',color:'#475569' }}>Sign in to access edit mode</p>
+                    <h2 style={{ margin:0,fontFamily:'Syne,sans-serif',fontWeight:800,fontSize:'1.25rem',color:locked?'#fca5a5':'#f1f5f9' }}>
+                      {locked ? 'Access Blocked' : 'Admin Login'}
+                    </h2>
+                    <p style={{ margin:'3px 0 0',fontSize:'0.75rem',fontFamily:'"JetBrains Mono",monospace',color:'#475569' }}>
+                      {locked ? 'Too many failed attempts' : 'Sign in to access edit mode'}
+                    </p>
                   </div>
                 </div>
-                <form onSubmit={handleLogin} style={{ display:'flex',flexDirection:'column',gap:'14px' }}>
-                  <div style={{ position:'relative' }}>
-                    <Mail size={14} style={{ position:'absolute',left:'14px',top:'50%',transform:'translateY(-50%)',color:'#475569',pointerEvents:'none',zIndex:2 }}/>
-                    <input type="email" value={email} onChange={e=>{setEmail(e.target.value);setLoginError('')}} placeholder="your@email.com" required autoFocus
-                      style={{ width:'100%',boxSizing:'border-box',padding:'13px 14px 13px 38px',borderRadius:'12px',outline:'none',background:'rgba(15,23,42,0.85)',border:'1px solid rgba(71,85,105,0.50)',color:'#f1f5f9',fontSize:'0.90rem' }}/>
+
+                {locked ? (
+                  <div style={{ display:'flex',flexDirection:'column',gap:'16px' }}>
+                    <div style={{ padding:'18px',borderRadius:'14px',background:'rgba(239,68,68,0.07)',border:'1px solid rgba(239,68,68,0.22)',textAlign:'center' }}>
+                      <div style={{ fontSize:'2rem',marginBottom:'8px' }}>🚫</div>
+                      <p style={{ margin:'0 0 6px',fontFamily:'Syne,sans-serif',fontWeight:700,fontSize:'0.90rem',color:'#fca5a5' }}>Too many failed attempts</p>
+                      <p style={{ margin:0,fontSize:'0.75rem',color:'#64748b',lineHeight:1.6 }}>
+                        Login is disabled to protect against unauthorized access. A security alert has been sent to the portfolio owner.
+                      </p>
+                    </div>
+                    <div style={{ display:'flex',alignItems:'center',justifyContent:'center',gap:'10px',padding:'14px',borderRadius:'12px',background:'rgba(0,0,0,0.30)',border:'1px solid rgba(255,255,255,0.06)' }}>
+                      <span style={{ fontSize:'0.72rem',color:'#64748b',fontFamily:'"JetBrains Mono",monospace' }}>Unlocks in</span>
+                      <span style={{ fontFamily:'"JetBrains Mono",monospace',fontWeight:700,fontSize:'1.15rem',color:'#f87171',letterSpacing:'0.08em' }}>
+                        {countdown || lockoutCountdown(secState)}
+                      </span>
+                    </div>
+                    <div style={{ padding:'14px',borderRadius:'12px',background:'rgba(99,102,241,0.06)',border:'1px solid rgba(99,102,241,0.18)' }}>
+                      <p style={{ margin:'0 0 6px',fontSize:'0.72rem',fontFamily:'"JetBrains Mono",monospace',color:'#818cf8',textTransform:'uppercase',letterSpacing:'0.12em' }}>Unlock early</p>
+                      <p style={{ margin:0,fontSize:'0.75rem',color:'#64748b',lineHeight:1.65 }}>
+                        Check <strong style={{color:'#94a3b8'}}>rutikyadav2004@gmail.com</strong> for a security alert email. Click the unlock link inside to restore access immediately.
+                      </p>
+                    </div>
+                    <button onClick={()=>setShowLogin(false)}
+                      style={{ width:'100%',padding:'12px',borderRadius:'12px',border:'1px solid rgba(255,255,255,0.10)',background:'transparent',color:'#64748b',cursor:'pointer',fontSize:'0.85rem',fontFamily:'Syne,sans-serif' }}>
+                      Close
+                    </button>
                   </div>
-                  <div style={{ position:'relative' }}>
-                    <KeyRound size={14} style={{ position:'absolute',left:'14px',top:'50%',transform:'translateY(-50%)',color:'#475569',pointerEvents:'none',zIndex:2 }}/>
-                    <input type="password" value={password} onChange={e=>{setPassword(e.target.value);setLoginError('')}} placeholder="Password" required
-                      style={{ width:'100%',boxSizing:'border-box',padding:'13px 14px 13px 38px',borderRadius:'12px',outline:'none',background:'rgba(15,23,42,0.85)',border:'1px solid rgba(71,85,105,0.50)',color:'#f1f5f9',fontSize:'0.90rem' }}/>
-                  </div>
-                  <AnimatePresence>
-                    {loginError && (
-                      <motion.div initial={{opacity:0,height:0}} animate={{opacity:1,height:'auto'}} exit={{opacity:0,height:0}} style={{overflow:'hidden'}}>
-                        <div style={{ display:'flex',alignItems:'flex-start',gap:'8px',padding:'11px 13px',borderRadius:'10px',background:'rgba(239,68,68,0.09)',border:'1px solid rgba(239,68,68,0.22)',color:'#fca5a5',fontSize:'0.78rem' }}>
-                          <AlertCircle size={13} style={{flexShrink:0,marginTop:'1px'}}/><span>{loginError}</span>
-                        </div>
-                      </motion.div>
+                ) : (
+                  <form onSubmit={handleLogin} style={{ display:'flex',flexDirection:'column',gap:'14px' }}>
+                    {attemptsLeft < LOGIN_MAX_ATTEMPTS && attemptsLeft > 0 && (
+                      <div style={{ display:'flex',alignItems:'center',gap:'8px',padding:'10px 13px',borderRadius:'10px',background:'rgba(245,158,11,0.08)',border:'1px solid rgba(245,158,11,0.28)',color:'#fbbf24',fontSize:'0.75rem' }}>
+                        <AlertTriangle size={13} style={{flexShrink:0}}/>
+                        <span><strong>{attemptsLeft}</strong> attempt{attemptsLeft===1?'':'s'} remaining before lockout</span>
+                      </div>
                     )}
-                  </AnimatePresence>
-                  <motion.button type="submit" disabled={loginLoading} whileHover={{scale:1.02,y:-1}} whileTap={{scale:0.98}}
-                    style={{ width:'100%',padding:'14px',borderRadius:'12px',border:'none',background:'linear-gradient(135deg,#6366f1,#8b5cf6)',color:'#fff',fontSize:'0.95rem',fontFamily:'Syne,sans-serif',fontWeight:700,cursor:loginLoading?'not-allowed':'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',boxShadow:'0 0 28px rgba(99,102,241,0.35)',opacity:loginLoading?0.65:1 }}>
-                    {loginLoading?<><Loader2 size={16} style={{animation:'spin 1s linear infinite'}}/> Signing in…</>:<><Lock size={16}/> Sign In</>}
-                  </motion.button>
-                </form>
+                    <div style={{ position:'relative' }}>
+                      <Mail size={14} style={{ position:'absolute',left:'14px',top:'50%',transform:'translateY(-50%)',color:'#475569',pointerEvents:'none',zIndex:2 }}/>
+                      <input type="email" value={email} onChange={e=>{setEmail(e.target.value);setLoginError('')}} placeholder="your@email.com" required autoFocus
+                        style={{ width:'100%',boxSizing:'border-box',padding:'13px 14px 13px 38px',borderRadius:'12px',outline:'none',background:'rgba(15,23,42,0.85)',border:'1px solid rgba(71,85,105,0.50)',color:'#f1f5f9',fontSize:'0.90rem' }}/>
+                    </div>
+                    <div style={{ position:'relative' }}>
+                      <KeyRound size={14} style={{ position:'absolute',left:'14px',top:'50%',transform:'translateY(-50%)',color:'#475569',pointerEvents:'none',zIndex:2 }}/>
+                      <input type="password" value={password} onChange={e=>{setPassword(e.target.value);setLoginError('')}} placeholder="Password" required
+                        style={{ width:'100%',boxSizing:'border-box',padding:'13px 14px 13px 38px',borderRadius:'12px',outline:'none',background:'rgba(15,23,42,0.85)',border:'1px solid rgba(71,85,105,0.50)',color:'#f1f5f9',fontSize:'0.90rem' }}/>
+                    </div>
+                    <AnimatePresence>
+                      {loginError && (
+                        <motion.div initial={{opacity:0,height:0}} animate={{opacity:1,height:'auto'}} exit={{opacity:0,height:0}} style={{overflow:'hidden'}}>
+                          <div style={{ display:'flex',alignItems:'flex-start',gap:'8px',padding:'11px 13px',borderRadius:'10px',background:'rgba(239,68,68,0.09)',border:'1px solid rgba(239,68,68,0.22)',color:'#fca5a5',fontSize:'0.78rem',whiteSpace:'pre-line' }}>
+                            <AlertCircle size={13} style={{flexShrink:0,marginTop:'1px'}}/><span>{loginError}</span>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    <motion.button type="submit" disabled={loginLoading} whileHover={{scale:1.02,y:-1}} whileTap={{scale:0.98}}
+                      style={{ width:'100%',padding:'14px',borderRadius:'12px',border:'none',background:'linear-gradient(135deg,#6366f1,#8b5cf6)',color:'#fff',fontSize:'0.95rem',fontFamily:'Syne,sans-serif',fontWeight:700,cursor:loginLoading?'not-allowed':'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',boxShadow:'0 0 28px rgba(99,102,241,0.35)',opacity:loginLoading?0.65:1 }}>
+                      {loginLoading?<><Loader2 size={16} style={{animation:'spin 1s linear infinite'}}/> Signing in…</>:<><Lock size={16}/> Sign In</>}
+                    </motion.button>
+                  </form>
+                )}
               </div>
             </motion.div>
           </motion.div>
