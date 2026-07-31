@@ -180,7 +180,7 @@ const DEFAULT_DATA: PortfolioData = {
     },
   ],
   education: [
-    { id: '1', degree: 'B.E. Computer Engineering', institution: 'Sinhgad Academy of Engineering, Pune', period: '2022 \u2013 2026', score: 'CGPA: 8.13', scoreValue: 81.3, badge: 'Pursuing' },
+    { id: '1', degree: 'B.E. Computer Engineering', institution: 'Sinhgad Academy of Engineering, Pune', period: '2022 \u2013 2026', score: 'CGPA: 8.19', scoreValue: 81.9, badge: 'Completed' },
     { id: '2', degree: 'Class XII \u2014 HSC (Maharashtra Board)', institution: 'Pratibhatai Pawar Jr College, Pune', period: '2022', score: 'Percentage: 62%', scoreValue: 62, badge: 'Completed' },
     { id: '3', degree: 'Class X \u2014 SSC (Maharashtra Board)', institution: 'Pratibhatai Pawar High School, Pune', period: '2019', score: 'Percentage: 82%', scoreValue: 82, badge: 'Completed' },
   ],

@@ -8,6 +8,7 @@ import { ThemeProvider }     from '@/context/ThemeContext'
 import ThemeApplicator       from '@/components/ThemeApplicator'
 import ConditionalLayers     from '@/components/ConditionalLayers'
 import ClientEffects         from '@/components/ClientEffects'
+import Preloader             from '@/components/Preloader'
 
 export const metadata: Metadata = {
   title:       'Rutik Yadav | Full Stack Developer',
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="preload" as="image" href="/poster_linkedin.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
@@ -46,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           MozOsxFontSmoothing:'grayscale',
         } as React.CSSProperties}
       >
+        <Preloader />
         <ThemeProvider>
           <AdminProvider>
             <PortfolioProvider>

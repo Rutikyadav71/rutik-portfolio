@@ -342,7 +342,11 @@ export default function ThreeBackground() {
           net.position.x=BASE_X
           sphMesh.scale.setScalar(lerp(r.scaleFrom, r.scaleTo, e))
           camera.position.z=lerp(r.camZTarget+2.5, r.camZTarget, e)
-          if (prog>=1) { r.phase='idle'; r.firstLoad=false; sphMesh.scale.setScalar(r.scaleTo); camera.position.z=r.camZTarget }
+          if (prog>=1) {
+            const wasFirst = r.firstLoad
+            r.phase='idle'; r.firstLoad=false; sphMesh.scale.setScalar(r.scaleTo); camera.position.z=r.camZTarget
+            if (wasFirst) window.dispatchEvent(new CustomEvent('three-planet-ready'))
+          }
         }
 
         // ── Exit ─────────────────────────────────────────────────────
