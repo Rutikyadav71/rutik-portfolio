@@ -117,7 +117,7 @@ export default function Contact() {
                 <span style={{ color:'#34d399',fontSize:'0.68rem',fontFamily:'"JetBrains Mono",monospace',fontWeight:600,letterSpacing:'0.14em',textTransform:'uppercase' }}>Available for hire</span>
               </div>
               <p style={{ margin:0,color:'#64748b',fontSize:'0.82rem',lineHeight:1.55 }}>
-                Graduating 2026 · Actively seeking full-time roles in Software Developement
+                Graduated 2026 · Actively seeking full-time roles in Software Developement
               </p>
             </motion.div>
           </motion.div>

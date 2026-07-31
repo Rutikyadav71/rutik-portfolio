@@ -10,6 +10,7 @@ import CodingLinks   from '@/components/Codinglinks'
 import Contact       from '@/components/Contact'
 import Footer        from '@/components/Footer'
 import SectionReveal from '@/components/SectionReveal'
+import AboutPosterReveal from '@/components/AboutPosterReveal'
 
 export default function Home() {
   return (
@@ -43,6 +44,9 @@ export default function Home() {
         <section id="about">
           <SectionReveal variant="slideUp"><About /></SectionReveal>
         </section>
+
+        {/* About → poster pinned reveal (poster slides in from the right, then hands off to Skills) */}
+        <AboutPosterReveal />
 
         {/* Skills */}
         <section id="skills">
